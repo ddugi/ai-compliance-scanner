@@ -1,0 +1,52 @@
+#!/bin/sh
+# AI Compliance Scanner — pre-commit hook
+# Blocks commits with HIGH risk compliance issues.
+#
+# Install:
+#   cp hooks/pre-commit .git/hooks/pre-commit
+#   chmod +x .git/hooks/pre-commit
+#
+# Or run the installer:
+#   python install_hooks.py
+
+SCANNER=$(which ai-compliance-scanner 2>/dev/null)
+
+if [ -z "$SCANNER" ]; then
+  echo "[compliance] ai-compliance-scanner not found. Skipping compliance check."
+  echo "[compliance] Install with: pip install -e ."
+  exit 0
+fi
+
+echo "[compliance] Running AI compliance scan..."
+
+REPORT=$(ai-compliance-scanner scan . --format json --output /tmp/pre_commit_compliance.json 2>&1)
+EXIT_CODE=$?
+
+if [ ! -f /tmp/pre_commit_compliance.json ]; then
+  echo "[compliance] Scan failed to produce a report. Skipping."
+  exit 0
+fi
+
+HIGH=$(python3 -c "
+import json
+try:
+    with open('/tmp/pre_commit_compliance.json') as f:
+        data = json.load(f)
+    print(data['summary']['high'])
+except Exception:
+    print('0')
+")
+
+if [ "$HIGH" != "0" ]; then
+  echo ""
+  echo "[compliance] COMMIT BLOCKED — $HIGH HIGH risk issue(s) found."
+  echo "[compliance] Run 'ai-compliance-scanner scan .' to see details."
+  echo "[compliance] Fix all HIGH risk issues before committing."
+  echo ""
+  rm -f /tmp/pre_commit_compliance.json
+  exit 1
+fi
+
+echo "[compliance] Passed — no HIGH risk issues found."
+rm -f /tmp/pre_commit_compliance.json
+exit 0

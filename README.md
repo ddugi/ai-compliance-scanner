@@ -126,6 +126,27 @@ MIT License — Copyright (c) 2026 DUGI
 
 ---
 
+## Pre-commit Hook
+
+Blocks any `git commit` that has HIGH risk compliance issues before the code reaches GitHub.
+
+**Install in one command:**
+
+```bash
+python install_hooks.py
+```
+
+Or manually:
+
+```bash
+cp hooks/pre-commit .git/hooks/pre-commit
+chmod +x .git/hooks/pre-commit
+```
+
+From that point on, every commit is scanned automatically. If HIGH risk issues are found the commit is blocked with a clear message telling you what to fix.
+
+---
+
 ## Slack Alerts
 
 Get a Slack message after every scan with the compliance score, risk counts, and top HIGH risk issues.
