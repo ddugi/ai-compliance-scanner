@@ -47,6 +47,7 @@ ai-compliance-scanner scan ./my-ai-project --format markdown --output report.md
 
 # Verbose mode
 ai-compliance-scanner scan ./my-ai-project --verbose
+
 ```
 
 ---
