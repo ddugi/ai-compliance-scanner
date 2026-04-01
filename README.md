@@ -1,0 +1,129 @@
+# AI Compliance Scanner
+
+**Open-source CLI tool that scans AI projects for EU AI Act and GDPR compliance gaps.**
+
+Analyzes your project's folder structure, configuration files, and code patterns — then outputs a compliance report with risk levels and actionable recommendations.
+
+---
+
+## Features
+
+- 🔍 **GDPR checks** — PII handling, privacy policy, consent, encryption, data retention, logging, secrets
+- 🤖 **EU AI Act checks** — Risk classification, human oversight, transparency, bias testing, model cards, prohibited use cases
+- 📊 **Rich terminal output** with color-coded risk levels
+- 📄 **Markdown & JSON report export**
+- ⚡ **Zero config** — just point it at a folder
+
+---
+
+## Installation
+
+```bash
+git clone https://github.com/ddugi/ai-compliance-scanner.git
+cd ai-compliance-scanner
+pip install -r requirements.txt
+pip install -e .
+```
+
+---
+
+## Usage
+
+```bash
+# Scan current directory
+ai-compliance-scanner scan
+
+# Scan a specific project
+ai-compliance-scanner scan ./my-ai-project
+
+# Quick summary only
+ai-compliance-scanner quick ./my-ai-project
+
+# Export as JSON
+ai-compliance-scanner scan ./my-ai-project --format json --output report.json
+
+# Export as Markdown
+ai-compliance-scanner scan ./my-ai-project --format markdown --output report.md
+
+# Verbose mode
+ai-compliance-scanner scan ./my-ai-project --verbose
+```
+
+---
+
+## Sample Compliance Report Output
+
+```
+╭─────────────────────────────────────────────────────╮
+│          AI Compliance Scanner Report               │
+│  Project: my-ai-project                             │
+│  Files scanned: 24                                  │
+│  🔴 HIGH risk: 3  🟡 MEDIUM: 4  🟢 LOW: 2           │
+╰─────────────────────────────────────────────────────╯
+
+GDPR Findings
+─────────────────────────────────────────────────────
+Risk     Rule ID     Title                    Recommendation
+🔴 HIGH  GDPR-001    Personal Data Detected   Ensure all personal data is documented in a ROPA...
+🔴 HIGH  GDPR-002    No Privacy Policy Found  Add a PRIVACY.md or link to a privacy policy...
+🟡 MED   GDPR-003    No Data Retention Policy Define and implement data retention periods...
+
+EU AI Act Findings
+─────────────────────────────────────────────────────
+Risk     Rule ID     Title                          Recommendation
+🔴 HIGH  AIACT-001   No Risk Classification Docs    Document your system's risk classification...
+🔴 HIGH  AIACT-002   No Human Oversight Mechanism   Implement human oversight controls (Art. 14)...
+🟡 MED   AIACT-005   No Bias Testing Detected       Implement bias and fairness testing...
+🟢 LOW   AIACT-006   No Model Card Found            Create a model card documenting intended use...
+
+Report saved to: compliance_report.md
+```
+
+---
+
+## GDPR Rules Checked
+
+| Rule ID  | Risk   | Check                         |
+|----------|--------|-------------------------------|
+| GDPR-001 | HIGH   | Personal data in code         |
+| GDPR-002 | HIGH   | Privacy policy missing        |
+| GDPR-003 | MEDIUM | No data retention policy      |
+| GDPR-004 | MEDIUM | No consent mechanism          |
+| GDPR-005 | HIGH   | No encryption found           |
+| GDPR-006 | HIGH   | PII in logs                   |
+| GDPR-007 | MEDIUM | No data export/deletion       |
+| GDPR-008 | HIGH   | Hardcoded secrets             |
+
+## EU AI Act Rules Checked
+
+| Rule ID   | Risk   | Check                         |
+|-----------|--------|-------------------------------|
+| AIACT-001 | HIGH   | No risk classification docs   |
+| AIACT-002 | HIGH   | No human oversight            |
+| AIACT-003 | MEDIUM | No AI transparency disclosure |
+| AIACT-004 | MEDIUM | No technical documentation    |
+| AIACT-005 | MEDIUM | No bias/fairness testing      |
+| AIACT-006 | LOW    | No model card                 |
+| AIACT-007 | HIGH   | Prohibited use case patterns  |
+| AIACT-008 | MEDIUM | No accuracy metrics           |
+| AIACT-009 | LOW    | No incident logging           |
+
+---
+
+## Run Tests
+
+```bash
+pytest tests/
+```
+
+---
+
+## License
+
+MIT License — Copyright (c) 2026 DUGI
+
+---
+
+## Author
+
+**DUGI** — [https://github.com/ddugi](https://github.com/ddugi)
