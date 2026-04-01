@@ -1,8 +1,10 @@
 # AI Compliance Scanner
 
-**Open-source CLI tool that scans AI projects for EU AI Act and GDPR compliance gaps.**
+**Know your risks before regulators do.**
 
-Analyzes your project's folder structure, configuration files, and code patterns — then outputs a compliance report with risk levels and actionable recommendations.
+An open-source CLI tool that scans AI projects for EU AI Act and GDPR compliance gaps. Built for developers and teams who want to ship AI products responsibly — without hiring a compliance consultant.
+
+Point it at any project folder and get a clear report: what is at risk, why it matters, and exactly what to fix. Runs in seconds, works offline, and integrates directly into your GitHub workflow.
 
 ---
 
