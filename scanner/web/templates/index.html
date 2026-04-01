@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Compliance Scanner</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">
+        <span class="logo-icon">S</span>
+        <span class="logo-text">Compliance<br><strong>Scanner</strong></span>
+      </div>
+
+      <div class="scan-box">
+        <label>Project Path</label>
+        <input type="text" id="pathInput" placeholder="/path/to/your/project" />
+        <button id="scanBtn" onclick="runScan()">Run Scan</button>
+      </div>
+
+      <div class="sidebar-links" id="exportButtons" style="display:none;">
+        <button class="export-btn" onclick="exportJSON()">Export JSON</button>
+        <button class="export-btn" onclick="exportMarkdown()">Export Markdown</button>
+      </div>
+
+      <div class="sidebar-footer">
+        <p>by <strong>DUGI</strong></p>
+        <p><a href="https://github.com/ddugi/ai-compliance-scanner" target="_blank">GitHub</a></p>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main">
+
+      <!-- Empty state -->
+      <div id="emptyState" class="empty-state">
+        <div class="empty-icon">S</div>
+        <h2>AI Compliance Scanner</h2>
+        <p>Enter a project path on the left and click Run Scan to check for EU AI Act and GDPR compliance issues.</p>
+      </div>
+
+      <!-- Loading -->
+      <div id="loadingState" class="loading-state" style="display:none;">
+        <div class="spinner"></div>
+        <p>Scanning project...</p>
+      </div>
+
+      <!-- Results -->
+      <div id="results" style="display:none;">
+
+        <!-- Header -->
+        <div class="results-header">
+          <div>
+            <h1 id="projectName">Project</h1>
+            <p id="fileCount" class="subtitle"></p>
+          </div>
+          <div class="score-badge" id="scoreBadge">
+            <div class="score-number" id="scoreNumber">-</div>
+            <div class="score-label" id="scoreLabel">-</div>
+          </div>
+        </div>
+
+        <!-- Summary cards -->
+        <div class="cards">
+          <div class="card card-high">
+            <div class="card-number" id="highCount">0</div>
+            <div class="card-label">HIGH</div>
+          </div>
+          <div class="card card-medium">
+            <div class="card-number" id="mediumCount">0</div>
+            <div class="card-label">MEDIUM</div>
+          </div>
+          <div class="card card-low">
+            <div class="card-number" id="lowCount">0</div>
+            <div class="card-label">LOW</div>
+          </div>
+          <div class="card card-total">
+            <div class="card-number" id="totalCount">0</div>
+            <div class="card-label">TOTAL</div>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-row">
+          <div class="chart-box">
+            <h3>Findings by Risk</h3>
+            <canvas id="riskChart"></canvas>
+          </div>
+          <div class="chart-box">
+            <h3>Findings by Category</h3>
+            <canvas id="categoryChart"></canvas>
+          </div>
+          <div class="chart-box score-gauge-box">
+            <h3>Compliance Score</h3>
+            <canvas id="scoreChart"></canvas>
+            <div class="gauge-label" id="gaugeLabel">-</div>
+          </div>
+        </div>
+
+        <!-- Filter tabs -->
+        <div class="filter-tabs">
+          <button class="tab active" onclick="filterFindings('all', this)">All</button>
+          <button class="tab" onclick="filterFindings('GDPR', this)">GDPR</button>
+          <button class="tab" onclick="filterFindings('EU AI Act', this)">EU AI Act</button>
+          <button class="tab tab-high" onclick="filterFindings('HIGH', this)">HIGH</button>
+          <button class="tab tab-medium" onclick="filterFindings('MEDIUM', this)">MEDIUM</button>
+          <button class="tab tab-low" onclick="filterFindings('LOW', this)">LOW</button>
+        </div>
+
+        <!-- Findings table -->
+        <div class="table-wrapper">
+          <table class="findings-table">
+            <thead>
+              <tr>
+                <th>Risk</th>
+                <th>Rule ID</th>
+                <th>Category</th>
+                <th>Title</th>
+                <th>Recommendation</th>
+              </tr>
+            </thead>
+            <tbody id="findingsBody"></tbody>
+          </table>
+          <div id="noFindings" class="no-findings" style="display:none;">No findings match the selected filter.</div>
+        </div>
+
+      </div>
+
+      <!-- Error -->
+      <div id="errorState" class="error-state" style="display:none;">
+        <p id="errorMsg"></p>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

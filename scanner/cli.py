@@ -52,6 +52,21 @@ def quick(path):
     reporter.quick_summary()
 
 
+@cli.command()
+@click.option("--port", "-p", default=5050, help="Port to run the web UI on")
+def ui(port):
+    """Launch the web UI dashboard in your browser."""
+    from .web.app import app
+    import webbrowser
+    import threading
+
+    url = f"http://localhost:{port}"
+    console.print(f"\n[bold blue]AI Compliance Scanner — Web UI[/bold blue]")
+    console.print(f"[dim]Opening {url} ...[/dim]\n")
+    threading.Timer(1.0, lambda: webbrowser.open(url)).start()
+    app.run(host="0.0.0.0", port=port, debug=False)
+
+
 def main():
     cli()
 
