@@ -126,6 +126,30 @@ MIT License — Copyright (c) 2026 DUGI
 
 ---
 
+## Slack Alerts
+
+Get a Slack message after every scan with the compliance score, risk counts, and top HIGH risk issues.
+
+**Setup:**
+
+1. Create a Slack incoming webhook at `api.slack.com/apps` — New App, Incoming Webhooks, copy the URL
+2. Run the scanner with the webhook:
+
+```bash
+ai-compliance-scanner scan ./my-project --slack-webhook https://hooks.slack.com/services/xxx/yyy/zzz
+```
+
+Or set it as an environment variable so you never need to pass it manually:
+
+```bash
+export SLACK_WEBHOOK_URL=https://hooks.slack.com/services/xxx/yyy/zzz
+ai-compliance-scanner scan ./my-project
+```
+
+**GitHub Action:** Add `SLACK_WEBHOOK_URL` as a repository secret in GitHub (`Settings → Secrets → Actions`) and the Action will send alerts automatically on every PR scan.
+
+---
+
 ## GitHub Action
 
 Automatically scans every Pull Request and blocks merges if HIGH risk issues are found.

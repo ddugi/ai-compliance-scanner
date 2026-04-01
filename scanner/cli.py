@@ -1,11 +1,13 @@
 """CLI entry point for AI Compliance Scanner."""
 
 import click
+import os
 from rich.console import Console
 from pathlib import Path
 
 from .analyzer import Analyzer
 from .reporter import Reporter
+from .notifier import send_slack_alert
 
 console = Console()
 
@@ -22,7 +24,8 @@ def cli():
 @click.option("--output", "-o", default="compliance_report.md", help="Output file for the report")
 @click.option("--format", "-f", "fmt", default="rich", type=click.Choice(["rich", "json", "markdown"]), help="Report format")
 @click.option("--verbose", "-v", is_flag=True, help="Show detailed scan information")
-def scan(path, output, fmt, verbose):
+@click.option("--slack-webhook", envvar="SLACK_WEBHOOK_URL", default=None, help="Slack webhook URL to send results to")
+def scan(path, output, fmt, verbose, slack_webhook):
     """Scan a project directory for compliance issues.
 
     PATH is the directory to scan (defaults to current directory).
@@ -36,6 +39,14 @@ def scan(path, output, fmt, verbose):
 
     reporter = Reporter(results, target)
     reporter.render(fmt=fmt, output_file=output)
+
+    webhook = slack_webhook or os.environ.get("SLACK_WEBHOOK_URL")
+    if webhook:
+        try:
+            send_slack_alert(webhook, results, target.name)
+            console.print("[green]Slack alert sent.[/green]")
+        except ConnectionError as e:
+            console.print(f"[red]Slack alert failed: {e}[/red]")
 
 
 @cli.command()

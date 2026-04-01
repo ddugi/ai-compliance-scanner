@@ -27,6 +27,8 @@ jobs:
 
       - name: Run compliance scan
         id: scan
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
           ai-compliance-scanner scan . --format markdown --output compliance_report.md
           ai-compliance-scanner scan . --format json --output compliance_report.json
