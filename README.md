@@ -8,11 +8,12 @@ Analyzes your project's folder structure, configuration files, and code patterns
 
 ## Features
 
-- 🔍 **GDPR checks** — PII handling, privacy policy, consent, encryption, data retention, logging, secrets
-- 🤖 **EU AI Act checks** — Risk classification, human oversight, transparency, bias testing, model cards, prohibited use cases
-- 📊 **Rich terminal output** with color-coded risk levels
-- 📄 **Markdown & JSON report export**
-- ⚡ **Zero config** — just point it at a folder
+- GDPR checks — PII handling, privacy policy, consent, encryption, data retention, logging, secrets
+- EU AI Act checks — Risk classification, human oversight, transparency, bias testing, model cards, prohibited use cases
+- Rich terminal output with color-coded risk levels
+- Markdown & JSON report export
+- Zero config — just point it at a folder
+- GitHub Action — auto-scan on every Pull Request, blocks merges on HIGH risk findings
 
 ---
 
@@ -47,8 +48,6 @@ ai-compliance-scanner scan ./my-ai-project --format markdown --output report.md
 
 # Verbose mode
 ai-compliance-scanner scan ./my-ai-project --verbose
-
-```
 
 ---
 
@@ -122,6 +121,21 @@ pytest tests/
 ## License
 
 MIT License — Copyright (c) 2026 DUGI
+
+---
+
+## GitHub Action
+
+Automatically scans every Pull Request and blocks merges if HIGH risk issues are found.
+
+The workflow is already included in `.github/workflows/compliance-scan.yml`. Once pushed to GitHub, it will:
+
+1. Run on every PR to `main`
+2. Post a comment on the PR with the full compliance report
+3. Block the merge if any HIGH risk findings exist
+4. Upload the report as a downloadable artifact
+
+No configuration needed — it works out of the box.
 
 ---
 

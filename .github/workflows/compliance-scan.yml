@@ -1,0 +1,85 @@
+name: AI Compliance Scan
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  compliance-scan:
+    name: Run Compliance Scanner
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -e .
+
+      - name: Run compliance scan
+        id: scan
+        run: |
+          ai-compliance-scanner scan . --format markdown --output compliance_report.md
+          ai-compliance-scanner scan . --format json --output compliance_report.json
+
+      - name: Check for HIGH risk findings
+        id: check_high
+        run: |
+          HIGH=$(python3 -c "
+          import json
+          with open('compliance_report.json') as f:
+              data = json.load(f)
+          print(data['summary']['high'])
+          ")
+          echo "high_count=$HIGH" >> $GITHUB_OUTPUT
+          echo "HIGH risk findings: $HIGH"
+
+      - name: Upload compliance report
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-report
+          path: |
+            compliance_report.md
+            compliance_report.json
+
+      - name: Comment PR with report
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('compliance_report.md', 'utf8');
+            const json = JSON.parse(fs.readFileSync('compliance_report.json', 'utf8'));
+            const s = json.summary;
+
+            const status = s.high > 0 ? '### BLOCKED — HIGH risk issues found' : '### PASSED — No HIGH risk issues';
+            const body = `## AI Compliance Scanner Report\n\n${status}\n\n` +
+              `| Risk | Count |\n|------|-------|\n` +
+              `| HIGH | ${s.high} |\n` +
+              `| MEDIUM | ${s.medium} |\n` +
+              `| LOW | ${s.low} |\n\n` +
+              `**Files scanned:** ${s.files_scanned}\n\n` +
+              `<details><summary>Full Report</summary>\n\n${report}\n\n</details>`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+      - name: Fail if HIGH risk findings exist
+        if: steps.check_high.outputs.high_count != '0'
+        run: |
+          echo "Compliance scan failed: ${{ steps.check_high.outputs.high_count }} HIGH risk issue(s) found."
+          echo "Review the compliance_report.md artifact for details."
+          exit 1
