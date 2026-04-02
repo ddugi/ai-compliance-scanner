@@ -9,6 +9,15 @@ import os
 from scanner.analyzer import Analyzer
 from scanner.rules.gdpr_rules import GDPRRules
 from scanner.rules.ai_act_rules import AIActRules
+from scanner.rules.owasp_rules import (
+    check_injection,
+    check_broken_auth,
+    check_sensitive_data_exposure,
+    check_security_misconfiguration,
+    check_xss,
+    check_insecure_deserialization,
+    check_insufficient_logging,
+)
 
 
 @pytest.fixture
@@ -49,7 +58,7 @@ class TestGDPRRules:
         assert "GDPR-002" in rule_ids
 
     def test_detects_hardcoded_secrets(self, temp_project):
-        contents = {"config.yaml": (temp_project / "config.yaml").read_text()}
+        contents = {"config.py": "AWS_SECRET_ACCESS_KEY = 'AKIAIOSFODNN7EXAMPLE'\npassword = 'hunter2'\n"}
         rules = GDPRRules(temp_project, contents)
         findings = rules.check()
         rule_ids = [f["rule_id"] for f in findings]
@@ -90,12 +99,49 @@ class TestAIActRules:
             assert "recommendation" in finding
 
 
+class TestOWASPRules:
+    def test_detects_injection(self, tmp_path):
+        (tmp_path / "db.py").write_text('cursor.execute("SELECT * FROM users WHERE id=" + user_id)\n')
+        finding = check_injection(list(tmp_path.iterdir()))
+        assert finding is not None
+        assert finding["rule_id"] == "OWASP-001"
+
+    def test_detects_debug_mode(self, tmp_path):
+        (tmp_path / "app.py").write_text("DEBUG = True\napp.run()\n")
+        finding = check_security_misconfiguration(list(tmp_path.iterdir()))
+        assert finding is not None
+        assert finding["rule_id"] == "OWASP-006"
+
+    def test_detects_pickle(self, tmp_path):
+        (tmp_path / "model.py").write_text("import pickle\ndata = pickle.loads(raw)\n")
+        finding = check_insecure_deserialization(list(tmp_path.iterdir()))
+        assert finding is not None
+        assert finding["rule_id"] == "OWASP-008"
+
+    def test_detects_missing_logging(self, tmp_path):
+        (tmp_path / "main.py").write_text("print('no logging here')\n")
+        finding = check_insufficient_logging(list(tmp_path.iterdir()))
+        assert finding is not None
+        assert finding["rule_id"] == "OWASP-010"
+
+    def test_no_injection_on_safe_code(self, tmp_path):
+        (tmp_path / "db.py").write_text('cursor.execute("SELECT * FROM users WHERE id=%s", (user_id,))\n')
+        finding = check_injection(list(tmp_path.iterdir()))
+        assert finding is None
+
+    def test_owasp_included_in_analyzer(self, temp_project):
+        analyzer = Analyzer(temp_project)
+        results = analyzer.run()
+        assert "owasp" in results
+
+
 class TestAnalyzer:
     def test_run_returns_expected_keys(self, temp_project):
         analyzer = Analyzer(temp_project)
         results = analyzer.run()
         assert "gdpr" in results
         assert "ai_act" in results
+        assert "owasp" in results
         assert "summary" in results
         assert "scanned_files" in results
 

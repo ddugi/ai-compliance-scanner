@@ -61,8 +61,8 @@ class Reporter:
             box=box.ROUNDED,
         ))
 
-        for category, key in [("GDPR", "gdpr"), ("EU AI Act", "ai_act")]:
-            findings = self.results[key]
+        for category, key in [("GDPR", "gdpr"), ("EU AI Act", "ai_act"), ("OWASP Top 10", "owasp")]:
+            findings = self.results.get(key, [])
             if not findings:
                 console.print(f"\n[green]✓ No {category} issues found.[/green]")
                 continue
@@ -100,8 +100,8 @@ class Reporter:
             "\n---\n",
         ]
 
-        for category, key in [("GDPR", "gdpr"), ("EU AI Act", "ai_act")]:
-            findings = self.results[key]
+        for category, key in [("GDPR", "gdpr"), ("EU AI Act", "ai_act"), ("OWASP Top 10", "owasp")]:
+            findings = self.results.get(key, [])
             lines.append(f"## {category} Findings\n")
             if not findings:
                 lines.append("✅ No issues found.\n")

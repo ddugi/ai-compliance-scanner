@@ -6,6 +6,7 @@ from typing import Any
 
 from .rules.gdpr_rules import GDPRRules
 from .rules.ai_act_rules import AIActRules
+from .rules.owasp_rules import OWASP_RULES
 
 
 SKIP_DIRS = {".git", "__pycache__", "node_modules", ".venv", "venv", ".env", "dist", "build"}
@@ -20,6 +21,7 @@ class Analyzer:
         self.results: dict[str, Any] = {
             "gdpr": [],
             "ai_act": [],
+            "owasp": [],
             "summary": {},
             "scanned_files": [],
         }
@@ -49,11 +51,18 @@ class Analyzer:
         ai_act = AIActRules(self.path, file_contents)
         self.results["ai_act"] = ai_act.check()
 
+        owasp_findings = []
+        for rule_fn in OWASP_RULES:
+            finding = rule_fn(self.files)
+            if finding:
+                owasp_findings.append(finding)
+        self.results["owasp"] = owasp_findings
+
         self._build_summary()
         return self.results
 
     def _build_summary(self):
-        all_findings = self.results["gdpr"] + self.results["ai_act"]
+        all_findings = self.results["gdpr"] + self.results["ai_act"] + self.results.get("owasp", [])
         self.results["summary"] = {
             "total": len(all_findings),
             "high": sum(1 for f in all_findings if f["risk"] == "HIGH"),
